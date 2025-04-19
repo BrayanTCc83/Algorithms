@@ -1,9 +1,11 @@
 import os
-import time
 import subprocess
+
+import random
+
+import numpy as np
 from matplotlib import pyplot
 from scipy.interpolate import interp1d
-import numpy as np
 
 algs = {}
 if __name__ == '__main__':
@@ -36,39 +38,68 @@ if __name__ == '__main__':
     chossen_algs: list = algs[category]
     print(f'Executing algoritms of {category}: {', '.join(chossen_algs)}')
     
-    results = {}
+    results = {
+        'best': {'x': [0]},
+        'average': {'x': [0]},
+        'worst': {'x': [0]}
+    }
+
     for alg in chossen_algs:
-        results['x'] = [ 0 ]
-        results[alg] = {}
-        results[alg]['y'] = [ 0 ]
+        for case in ['best', 'average', 'worst']:
+            if alg not in results[case]:
+                results[case][alg] = {'y': [0]}
 
-    for n in [ 1, 10, 100, 1000, 10000, 50000, 100000, 500000, 1000000 ]:
-        input_data: str = ' \n'.join(str(i + 1) for i in range(n))
-        results['x'].append(n)
+    # Problem sizes
+    problem_sizes = [1, 10, 100, 1000, 10000, 50000, 100000, 500000, 1000000]
 
+    # Case loop
+    for case in ['best', 'average', 'worst']:
+        for n in problem_sizes:
+            if case == 'best':
+                input_data = ' '.join(str(i + 1) for i in range(n))
+            elif case == 'average':
+                data = list(range(n))
+                random.shuffle(data)
+                input_data = ' '.join(str(i + 1) for i in data)
+            elif case == 'worst':
+                input_data = ' '.join(str(i) for i in range(n, 0, -1))
+
+            results[case]['x'].append(n)
+
+            for alg in chossen_algs:
+                process = subprocess.Popen(
+                    [f'./build/{alg}_{category}', str(n)],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                stdout, stderr = process.communicate(input=input_data.encode())
+                output = stdout.decode().strip()
+
+                # Handle invalid or missing output
+                if not output or len(output.split()) < 2:
+                    print(f"[Warning] Invalid output for {alg}, {case} case, n={n}: '{output}'")
+                    results[case][alg]['y'].append(0)
+                    continue
+
+                start_str, end_str = output.split()
+                start, end = int(start_str), int(end_str)
+                results[case][alg]['y'].append(end - start)
+
+        # Plotting each case
+        pyplot.figure(case.capitalize() + ' Case')
+        pyplot.title(f'Comparison of {category} algorithms: {case.capitalize()} Case')
+        pyplot.ylabel('Execution time [ms]')
+        pyplot.xlabel('Amount of numbers')
+        pyplot.xscale('log')
+
+        xnew = np.linspace(results[case]['x'][0], results[case]['x'][-1], num=500, endpoint=True)
         for alg in chossen_algs:
-            process = subprocess.Popen(
-                [ f'./build/{alg}_{category}', str(n) ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            stdout, stderr = process.communicate(input=input_data.encode())
-            output = stdout.decode().strip()
+            f = interp1d(results[case]['x'], results[case][alg]['y'], kind='cubic', fill_value="extrapolate")
+            pyplot.plot(xnew, f(xnew), label=alg)
 
-            start_str, end_str = output.split()
-            start, end = int(start_str), int(end_str)
-            results[alg]['y'].append(end - start)
+        pyplot.legend(loc='best')
 
-    xnew = np.linspace(results['x'][0], results['x'][-1], num=500, endpoint=True)
-    for alg in chossen_algs:
-        f = interp1d(results['x'], results[alg]['y'], kind='cubic', fill_value="extrapolate")
-        pyplot.plot(xnew, f(xnew))
-    
-    pyplot.legend(chossen_algs, loc='best')
-    pyplot.title(f'Comparation of {category} algorithms: Worst Case')
-    pyplot.ylabel('Execution time [ms]')
-    pyplot.xlabel('Amount of numbers')
-    pyplot.xscale('log')
+    # Show all plots
     pyplot.show()
     os.system('make clean')
