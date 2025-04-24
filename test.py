@@ -9,8 +9,7 @@ from scipy.interpolate import interp1d
 
 algs = {}
 if __name__ == '__main__':
-    if not os.path.exists('build'):
-        os.system('make all')
+    os.system('make all')
     
     process = subprocess.Popen(
         [ 'ls', 'build' ],

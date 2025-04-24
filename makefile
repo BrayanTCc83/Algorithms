@@ -39,7 +39,7 @@ $(TMP_DIR)/%.o: $(SHARED_SRC) | $(TMP_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile each test with shared objects
-$(OUT_DIR)/%: $(TESTS) $(SHARED_OBJ) | $(OUT_DIR)
+$(OUT_DIR)/%: $(TEST_DIR)/%.c $(SHARED_OBJ) | $(OUT_DIR)
 	$(CC) $(CFLAGS) -o $@ $< $(SHARED_OBJ) $(SRC_DIR)/global.c -L $(SRC_DIR)/global.h
 
 # Clean
