@@ -35,3 +35,11 @@ int* read_fixed_integers(int n) {
 
     return arr;
 }
+
+void print_array(int n, int *array) {
+    printf("Array: ");
+    for(int i = 0; i < n; i++) {
+        pritnf("%d ", array[i]);
+    }
+    printf("\n");
+}
