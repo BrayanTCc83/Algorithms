@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "../headers/sort.h"
 
 /**
@@ -149,4 +150,39 @@ void selection_sort(int n, int *array) {
         array[i] = array[minidx];
         array[minidx] = swap;
     }
+}
+
+static void swap(int *array, int i, int j) {
+    int _swap = array[i];
+    array[i] = array[j];
+    array[j] = _swap;
+}
+
+void cocktail_shaker_sort(int n, int *array) {
+    bool swapped = false;
+    // 10 2 1 5 12; swapped = false;
+    //      2 10 1 5 12; swapped = true
+    //          2 1 10 5 12; swapped = true
+    //              2 1 5 10 12; swapped = true
+    // 1 2 5 10 12
+    do {
+        // Subir los valores grandes
+        for(int i = 0; i < n - 1; i++) {
+            if(array[i] > array[i + 1]) {
+                swap(array, i, i + 1);
+                swapped = true;
+            }
+        }
+        if(!swapped) {
+            break;
+        }
+        swapped = false;
+        // Bajar los valores pequeños
+        for(int i = n - 2; i >= 0; i--) {
+            if(array[i] > array[i + 1]) {
+                swap(array, i, i + 1);
+                swapped = true;
+            }
+        }
+    } while(swapped);
 }
