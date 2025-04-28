@@ -103,3 +103,50 @@ void counting_sort(int n, int* array) {
         }
     }
 }
+
+/**
+ * O(n^2)
+ */
+void insertion_sort(int n, int *array) {
+    for(int i = 1; i < n; i++) {
+        // 2 7 4 8 1; key = 7
+        // key = 4; 2 7 7 8 1 -> 2 4 7 8 1
+        // key = 8; 2 4 7 8 1
+        // key = 1; 2 4 7 8 8 -> 2 4 7 7 8 -> 2 4 4 7 8 -> 2 2 4 7 8 -> 1 2 4 7 8
+        int key = array[i];
+        int j = i - 1;
+        while(j >= 0 && array[j] > key) {
+            array[j + 1] = array[j];
+            j--;
+        }
+        array[j + 1] = key;
+    }
+}
+
+/**
+ * O(n^2)
+ */
+void selection_sort(int n, int *array) {
+    int swap;
+    for(int i = 0; i < n; i++) {
+        /**
+         * 10 9 8 7 6; minidx = 4
+         * 6 9 8 7 10; minidx = 3
+         * 6 7 8 9 10
+         */
+        int minidx = i;
+        for(int j = i + 1; j < n; j++) {
+            if(array[j] < array[minidx]) {
+                minidx = j;
+            }
+        }
+        
+        if(minidx == i) {
+            continue;
+        }
+
+        swap = array[i];
+        array[i] = array[minidx];
+        array[minidx] = swap;
+    }
+}
