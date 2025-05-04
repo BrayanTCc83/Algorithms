@@ -3,6 +3,39 @@
 #include <stdbool.h>
 #include "../headers/sort.h"
 
+// O(n) = 6n + 2
+static int mina(int n, int *array) {
+    int min = INT_MAX; // 1
+
+    for(int i = 0 /*1*/; i < n/*n*/; i++/*n*/) {
+        if(array[i] < min) { // 2
+            min = array[i]; // 2
+        }
+    }
+
+    return min;
+}
+
+// O(n) = 6n + 2
+static int maxa(int n, int *array) {
+    int max = INT_MIN;
+
+    for(int i = 0; i < n; i++) {
+        if(array[i] > max) {
+            max = array[i];
+        }
+    }
+
+    return max;
+}
+
+// O(1) = 6
+static void swap(int *array, int i, int j) {
+    int _swap = array[i];
+    array[i] = array[j];
+    array[j] = _swap;
+}
+
 /**
  * Conteo de operaciones:
  * - Operaciones básicas cuentan como 1 operación.
@@ -21,6 +54,7 @@
  *   número de repeticiones, si no, se deja en terminos de n.
  */
 
+// COMPARISION SORT ALGORITHMS
 /**
  * bubble_sort(n) = 13n^2 + 17/2n + 3
  */
@@ -43,64 +77,6 @@ void bubble_sort(int n, int* array) {
                 array[j] = array[j - 1]; // 3 operaciones
                 array[j - 1] = swap; // 2 operaciones
             }
-        }
-    }
-}
-
-// 6n + 2
-static int mina(int n, int *array) {
-    int min = INT_MAX; // 1
-
-    for(int i = 0 /*1*/; i < n/*n*/; i++/*n*/) {
-        if(array[i] < min) { // 2
-            min = array[i]; // 2
-        }
-    }
-
-    return min;
-}
-
-// 6n + 2
-static int maxa(int n, int *array) {
-    int max = INT_MIN;
-
-    for(int i = 0; i < n; i++) {
-        if(array[i] > max) {
-            max = array[i];
-        }
-    }
-
-    return max;
-}
-
-/**
- * Arreglos con muchos datos repetidos.
- * 
- * Ocupa mucho espacio en memoria y desperdicia más si los valores
- * son muy dispares.
- * 
- * 5n + x + 6n + 2 + 6n + 2 + 3 + n + 5n + 1 + 2x + 1 + 1
- * 
- * counting_sort(n) = 23n + 3x + 9; x = max(n) - min(n) + 1
- * 
- * Si los datos están muy dispersos, entonces x es muy grande.
- * Si los datos están muy comprimidos, entonces x es despreciable.
- */
-void counting_sort(int n, int* array) {
-    int min = mina(n, array); // 6n + 2
-    int max = maxa(n, array); // 6n + 2
-    int size = max - min + 1; // 3
-
-    int *counter = (int*) calloc(size,  sizeof(int)); // n
-    for(int i = 0; i < n; i++) { // 1 + n + n + n*(3) = 5n + 1
-        counter[array[i] - min]++; // 3
-    }
-
-    int j = 0; // 1
-    for(int i = 0; i < size; i++) { // 1 + x + x
-        while(counter[i]) { // x + n + n * (4) = 5n + x
-            array[j++] = i + min; // 3
-            counter[i]--; // 1
         }
     }
 }
@@ -152,12 +128,9 @@ void selection_sort(int n, int *array) {
     }
 }
 
-static void swap(int *array, int i, int j) {
-    int _swap = array[i];
-    array[i] = array[j];
-    array[j] = _swap;
-}
-
+/**
+ * O(n^2)
+ */
 void cocktail_shaker_sort(int n, int *array) {
     bool swapped = false;
     // 10 2 1 5 12; swapped = false;
@@ -185,4 +158,38 @@ void cocktail_shaker_sort(int n, int *array) {
             }
         }
     } while(swapped);
+}
+
+// NON COMPARISION SORT ALGORITHMS
+
+/**
+ * Arreglos con muchos datos repetidos.
+ * 
+ * Ocupa mucho espacio en memoria y desperdicia más si los valores
+ * son muy dispares.
+ * 
+ * 5n + x + 6n + 2 + 6n + 2 + 3 + n + 5n + 1 + 2x + 1 + 1
+ * 
+ * counting_sort(n) = 23n + 3x + 9; x = max(n) - min(n) + 1
+ * 
+ * Si los datos están muy dispersos, entonces x es muy grande.
+ * Si los datos están muy comprimidos, entonces x es despreciable.
+ */
+void counting_sort(int n, int* array) {
+    int min = mina(n, array); // 6n + 2
+    int max = maxa(n, array); // 6n + 2
+    int size = max - min + 1; // 3
+
+    int *counter = (int*) calloc(size,  sizeof(int)); // n
+    for(int i = 0; i < n; i++) { // 1 + n + n + n*(3) = 5n + 1
+        counter[array[i] - min]++; // 3
+    }
+
+    int j = 0; // 1
+    for(int i = 0; i < size; i++) { // 1 + x + x
+        while(counter[i]) { // x + n + n * (4) = 5n + x
+            array[j++] = i + min; // 3
+            counter[i]--; // 1
+        }
+    }
 }
